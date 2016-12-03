@@ -20,6 +20,7 @@ import java.util.Scanner;
 public class Modularity {
 
     private int totalVertexNumber = 0;
+    private int test;
     private HashMap<Integer, Cluster> clusterList;
     private HashMap<Integer, List<Integer>> adjacencyListInt = new HashMap<Integer, List<Integer>>();
 
