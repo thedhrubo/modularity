@@ -21,6 +21,7 @@ public class Modularity {
 
     private int totalVertexNumber = 0;
     private HashMap<Integer, Cluster> clusterList;
+    private int testmaster;
     private HashMap<Integer, List<Integer>> adjacencyListInt = new HashMap<Integer, List<Integer>>();
 
     public Modularity(int lnoClique, int lnoStar, int lnoVertexClique, int lnoVertexStar, double lcohesion) {
