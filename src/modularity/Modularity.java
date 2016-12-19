@@ -212,29 +212,38 @@ public class Modularity {
         }
     }
 
+    /*
+    
+    We calculated the Newman Girvan Modularity(Q) here.
+    Equation is : Q = (summation of all the modules)[(ls/L) - square(ds/2L)]
+    here ls = number of links between nodes in the module s
+         L =  number of links in the network
+         ds = sum of the degrees of the nodes in module s
+     */
     public double calculateModularity() {
         double modularity = 0;
         int totalEdge = 0;
         int totalInnerEdge = 0;
         int totalConnectedEdge = 0;
         Iterator<Integer> keysetIteratorInt = clusterList.keySet().iterator();
-        while (keysetIteratorInt.hasNext()){
+        while (keysetIteratorInt.hasNext()) {
             Integer keyint = keysetIteratorInt.next();
             Cluster objCluster = clusterList.get(keyint);
             totalInnerEdge = totalInnerEdge + objCluster.getnoEdge();
             totalConnectedEdge = totalConnectedEdge + objCluster.getconnectedEdge();
         }
-        totalConnectedEdge = (int) Math.ceil(totalConnectedEdge/2);
-        totalEdge = totalInnerEdge+totalConnectedEdge;
+        totalConnectedEdge = (int) Math.ceil(totalConnectedEdge / 2);
+        totalEdge = totalInnerEdge + totalConnectedEdge;
         Iterator<Integer> keysetIteratorInt1 = clusterList.keySet().iterator();
-        while (keysetIteratorInt1.hasNext()){
+        while (keysetIteratorInt1.hasNext()) {
             Integer keyint = keysetIteratorInt1.next();
             Cluster objCluster = clusterList.get(keyint);
-            double temp = (2 * (double) objCluster.getnoEdge()) + (double) objCluster.getconnectedEdge();
-            double temp2 = Math.pow((temp / (2 * (double) totalEdge)), 2);
+            // sum of Degree = every edge has two degree in the connecting egdes inside the cluster + connecting edge has one degree outside the cluster 
+            double sumOfDegree = (2 * (double) objCluster.getnoEdge()) + (double) objCluster.getconnectedEdge();
+            double temp2 = Math.pow((sumOfDegree / (2 * (double) totalEdge)), 2);
             modularity = modularity + (((double) objCluster.getnoEdge() / (double) totalEdge) - temp2);
         }
-        
+
         return modularity;
     }
 
@@ -258,12 +267,20 @@ public class Modularity {
             List<Integer> subList = combinationList.get(i);
             Cluster objCluster1 = clusterList.get(subList.get(0));
             Cluster objCluster2 = clusterList.get(subList.get(1));
-            int connectedEdge = (int) Math.ceil(objCluster1.getnoVertex() * objCluster2.getnoVertex()* Math.log1p(lcohesion) * (-1));
+            int connectedEdge;
+            if (lcohesion < 0.6) {
+                connectedEdge = (int) Math.ceil(objCluster1.getnoVertex() * objCluster2.getnoVertex() * (1 - lcohesion) * 0.1);
+            } else {
+                double value = Math.log10(lcohesion);
+                value = value * -0.1;
+                connectedEdge = (int) Math.floor(objCluster1.getnoVertex() * objCluster2.getnoVertex() * value);
+            }
+
             if (connectedEdge < 1) {
                 connectedEdge = 1;
             }
             Random ran = new Random();
-            
+
             int j = 1;
             while (j <= connectedEdge) {
                 int sourceVertex = ran.nextInt(objCluster1.getendVertex() - objCluster1.getstartVertex() + 1) + objCluster1.getstartVertex();
@@ -272,8 +289,73 @@ public class Modularity {
                     j++;
                 }
             }
-            objCluster1.setconnectedEdge(objCluster1.getconnectedEdge()+connectedEdge);
-            objCluster2.setconnectedEdge(objCluster2.getconnectedEdge()+connectedEdge);
+            objCluster1.setconnectedEdge(objCluster1.getconnectedEdge() + connectedEdge);
+            objCluster2.setconnectedEdge(objCluster2.getconnectedEdge() + connectedEdge);
+        }
+
+    }
+
+    public void outerconnectionByMinVertx(double lcohesion, List<List<Integer>> combinationList) {
+        for (int i = 0; i < combinationList.size(); i++) {
+            List<Integer> subList = combinationList.get(i);
+            Cluster objCluster1 = clusterList.get(subList.get(0));
+            Cluster objCluster2 = clusterList.get(subList.get(1));
+            int connectedEdge;
+
+            double value = Math.log10(lcohesion);
+            value = value * -1;
+            connectedEdge = (int) Math.round(Math.min(objCluster1.getnoVertex(), objCluster2.getnoVertex()) * value);
+
+//            if(lcohesion < 0.6){
+//                connectedEdge = (int) Math.ceil(Math.min(objCluster1.getnoVertex(), objCluster2.getnoVertex()) * (1-lcohesion));
+//            }else{
+//                double value = Math.log10(lcohesion);
+//                value = value * -1;
+//                connectedEdge = (int) Math.floor(Math.min(objCluster1.getnoVertex(), objCluster2.getnoVertex()) * value);
+//            }
+            if (connectedEdge < 1) {
+                connectedEdge = 1;
+            }
+            Random ran = new Random();
+
+            int j = 1;
+            while (j <= connectedEdge) {
+                int sourceVertex = ran.nextInt(objCluster1.getendVertex() - objCluster1.getstartVertex() + 1) + objCluster1.getstartVertex();
+                int destinationVertex = ran.nextInt(objCluster2.getendVertex() - objCluster2.getstartVertex() + 1) + objCluster2.getstartVertex();
+                if (setEdge(sourceVertex, destinationVertex)) {
+                    j++;
+                }
+            }
+            objCluster1.setconnectedEdge(objCluster1.getconnectedEdge() + connectedEdge);
+            objCluster2.setconnectedEdge(objCluster2.getconnectedEdge() + connectedEdge);
+        }
+
+    }
+
+    /*
+    
+    This funciton is written to export the graph output compatible with the graphviz software so that we can represent the graph in a visulization form.
+     */
+    public boolean export_graphviz() {
+        String directedGraphint = "graph {\n";
+        Iterator<Integer> keysetIteratorInt = adjacencyListInt.keySet().iterator();
+        while (keysetIteratorInt.hasNext()) {
+            Integer keyint = keysetIteratorInt.next();
+            List<Integer> elements = adjacencyListInt.get(keyint);
+            if (elements.size() > 0) {
+                for (int i = 0; i < elements.size(); i++) {
+                    directedGraphint = directedGraphint + keyint + "--" + elements.get(i) + ";\n";
+                }
+            }
+        }
+        directedGraphint = directedGraphint + "}";
+        try {
+            PrintWriter writer = new PrintWriter("finaltest.dot");
+            writer.write(directedGraphint);
+            writer.close();
+            return true;
+        } catch (Exception e) {
+            return false;
         }
 
     }
@@ -335,16 +417,19 @@ public class Modularity {
             vertices[i] = i + 1;
         }
         List<List<Integer>> combinationList = objModularity.Combination(vertices);
-        objModularity.outerconnection(cohesion, combinationList);
+        objModularity.outerconnectionByMinVertx(cohesion, combinationList);
         long startTime = System.nanoTime();
         objModularity.export_d3j();
+        objModularity.export_graphviz();
+
         long endTime = System.nanoTime();
-        System.out.println("Took "+(endTime - startTime) + " ns"); 
+        System.out.println("Took " + (endTime - startTime) + " ns");
         double modularity = objModularity.calculateModularity();
         System.out.println(modularity);
         int i = 0;
         long finalstartTime = System.nanoTime();
-        System.out.println("Took "+(finalstartTime - initialstartTime) + " ns"); 
+        System.out.println("Took " + (finalstartTime - initialstartTime) + " ns");
+
     }
 
 }
