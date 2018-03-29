@@ -1,6 +1,8 @@
-Synthetic Generator :
+Synthetic Graph Generator :
 
-We tried to implement a synthetic generator in this project which will create a graph based on the given input.
+We tried to implement a synthetic graph generator in this project which will create different kinds of graph network based on given vertex,
+edge and cohesion. Visualization is also developed based on the generated synthetic graph.
+
 We target for the star and clique in the project.
 The input of the project is :
 
