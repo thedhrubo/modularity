@@ -1,9 +1,8 @@
 Synthetic Graph Generator :
 
-We tried to implement a synthetic graph generator in this project which will create different kinds of graph network based on given vertex,
-edge and cohesion. Visualization is also developed based on the generated synthetic graph.
+In this project I implemented a synthetic graph generator in this project which will create different kinds of graph network based on given vertex, edge and cohesion. Visualization is also developed based on the generated synthetic graph.
 
-We target for the star and clique in the project.
+I target for the star and clique in the project.
 The input of the project is :
 
 No of Star :
@@ -16,19 +15,19 @@ Based on the cohesion value the stars and cliques will be strongly connected bet
 cohesion.
 
 
-We calculated the Newman Girvan Modularity(Q) here.
+I calculated the Newman Girvan Modularity(Q) here.
     Equation is : Q = (summation of all the modules)[(ls/L) - square(ds/2L)]
     here ls = number of links between nodes in the module s
          L =  number of links in the network
          ds = sum of the degrees of the nodes in module s
 
-To execute the project you need an editor that supports java. We completed our project in Netbeans editor. If you execute the project then two kinds of file will be exported.
+To execute the project you need an editor that supports java. I completed the project in Netbeans editor. If you execute the project then two kinds of file will be exported.
 1. finaltest.dot
 2. d3viz.json
 
 dot file is used for the next project which we will include with this project later. And the jSON file is used for the better visualization. There is a index.html.
 Which is reading the data from the d3viz.json file and showing the output based on that. 
 
-You will find everything in the github with the much update as we have plan to modify it more with some ideas of implementing several kinds of synthetic generator.
+You will find everything in the github with the much update as I have plan to modify it more with some ideas of implementing several kinds of synthetic generator.
 
 https://github.com/thedhrubo/modularity
